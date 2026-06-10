@@ -1,0 +1,105 @@
+apply from: 'deps.gradle'
+
+task installDeps {
+    doLast {
+        deps.each { dep ->
+            def depPath = "${buildDir}/deps/${dep.repo}"
+
+            if (!file(depPath).exists()) {
+                println "Cloning dependency repo: ${dep.repo} from org ${org}"
+                exec {
+                    commandLine "git", "clone", "https://github.com/${org}/${dep.repo}.git", depPath
+                }
+            } else {
+                println "Updating dependency repo: ${dep.repo}"
+                exec {
+                    workingDir depPath
+                    commandLine "git", "pull"
+                }
+            }
+
+            // Handle version logic
+            if (dep.version == "latest") {
+                println "Fetching latest commit for ${dep.repo}"
+                exec {
+                    workingDir depPath
+                    commandLine "git", "checkout", "main"   // assumes main is default branch
+                }
+                exec {
+                    workingDir depPath
+                    commandLine "git", "pull"
+                }
+            } else {
+                println "Checking out version ${dep.version} for ${dep.repo}"
+                exec {
+                    workingDir depPath
+                    commandLine "git", "checkout", dep.version
+                }
+            }
+
+            // Instead of calling install.sh directly, run Gradle install task
+            println "Installing dependency via Gradle: ${dep.repo}"
+            exec {
+                workingDir depPath
+                commandLine "./gradlew", "install"
+            }
+        }
+    }
+}
+
+task install(dependsOn: installDeps) {
+    doLast {
+        println "Installing current tool..."
+        exec {
+            commandLine "bash", "src/install.sh"
+        }
+    }
+}
+
+// -------------------- UNINSTALL --------------------
+task uninstallCurrent {
+    doLast {
+        println "Uninstalling current tool..."
+        exec {
+            commandLine "bash", "src/uninstall.sh"
+        }
+    }
+}
+
+task uninstallDeps {
+    doLast {
+        println "Uninstalling dependencies..."
+        deps.each { dep ->
+            def depPath = "${buildDir}/deps/${dep.repo}"
+            if (file(depPath).exists()) {
+                println "Uninstalling dependency via Gradle: ${dep.repo}"
+                exec {
+                    workingDir depPath
+                    commandLine "./gradlew", "uninstall"
+                }
+            } else {
+                println "Dependency ${dep.repo} not found in ${depPath}, skipping..."
+            }
+        }
+    }
+}
+
+task uninstall(dependsOn: [uninstallCurrent, uninstallDeps]) {
+    doLast {
+        println "✅ Uninstall sequence complete"
+    }
+}
+
+// Task to completely delete the build folder (including .git dirs)
+task cleanBuildDir {
+    doLast {
+        def buildDirFile = file("${buildDir}")
+        if (buildDirFile.exists()) {
+            println "Deleting build directory: ${buildDirFile}"
+            // Use Gradle's built-in delete to recursively remove everything
+            delete buildDirFile
+        } else {
+            println "Build directory does not exist, nothing to delete."
+        }
+    }
+}
