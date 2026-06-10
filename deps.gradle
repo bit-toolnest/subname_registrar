@@ -2,7 +2,5 @@ ext.org = "bit-toolnest"   // your GitHub org
 
 //use real tool repo instead of toolA, toolB, toolC
 ext.deps = [
-    [repo: "toolA", version: "v1.2.0"],   // fixed tag
-    [repo: "toolB", version: "main"],     // fixed branch
-    [repo: "toolC", version: "latest"]    // always fetch most recent
+    [repo: "subdomain_registrar", version: "latest"]    // always fetch most recent
 ]
