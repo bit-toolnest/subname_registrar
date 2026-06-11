@@ -1,18 +1,25 @@
-#!/bin/bash
-set -e
+#!/usr/bin/env bash
+set -euo pipefail
 
-echo "=== Dummy Installer Script ==="
-echo "This script should install all required components for the tool."
+# main/install.sh
+# Installs regen_nginx_routes.sh into /usr/local/bin with secure permissions
 
-# Example steps (replace with real commands):
-# 1. Install system packages
-#    sudo apt update && sudo apt install -y <package>
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+F_REGEN_NGINX="$SCRIPT_DIR/regen_nginx_routes.sh"
+REGEN_NGINX_DST="/usr/local/bin/regen_nginx_routes.sh"
 
-# 2. Configure environment variables
-#    echo "export TOOL_HOME=/opt/tool" | sudo tee -a /etc/environment
+# Copy the regen script
+install -m 700 "$F_REGEN_NGINX" "$REGEN_NGINX_DST"
 
-# 3. Start services or background processes
-#    sudo systemctl enable tool.service
-#    sudo systemctl start tool.service
+# Ensure ownership
+chown root:root "$REGEN_NGINX_DST"
 
-echo "✅ Installation complete (dummy run)"
+# Check file mode (must be 700)
+MODE="$(stat -c '%a' "$REGEN_NGINX_DST")"
+if [ "$MODE" != "700" ]; then
+  echo "ERROR: $REGEN_NGINX_DST has wrong mode ($MODE), expected 700" >&2
+  exit 1
+fi
+
+echo "Installed $REGEN_NGINX_DST with mode 700 and root ownership."
+
