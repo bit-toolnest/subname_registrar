@@ -3,24 +3,34 @@ apply from: 'deps.gradle'
 task installDeps {
     doLast {
         deps.each { dep ->
-            def depPath = "${buildDir}/deps/${dep.repo}"
+            def depBase = "${buildDir}/deps/${dep.repo}"
+            def depZip = "${depBase}.zip"
+            def branchOrTag = dep.version == "latest" ? "main" : dep.version
 
-            if (!file(depPath).exists()) {
+            if (!file(depBase).exists()) {
                 println "Downloading dependency repo: ${dep.repo} from org ${org}"
-                def branchOrTag = dep.version == "latest" ? "main" : dep.version
                 exec {
                     commandLine "curl", "-L",
                         "https://github.com/${org}/${dep.repo}/archive/${branchOrTag}.zip",
-                        "-o", "${depPath}.zip"
+                        "-o", depZip
                 }
-                exec {
-                    commandLine "unzip", "-q", "${depPath}.zip", "-d", "${buildDir}/deps"
+
+                // Use Gradle's built-in copy to unzip
+                project.copy {
+                    from zipTree(depZip)
+                    into "${buildDir}/deps"
+                }
+
+                // Fix extracted folder name (GitHub adds -main or -tag suffix)
+                def extracted = file("${buildDir}/deps/${dep.repo}-${branchOrTag}")
+                if (extracted.exists()) {
+                    extracted.renameTo(file(depBase))
                 }
             }
 
             println "Installing dependency via Gradle: ${dep.repo}"
             exec {
-                workingDir depPath
+                workingDir depBase
                 commandLine "./gradlew", "install"
             }
         }
