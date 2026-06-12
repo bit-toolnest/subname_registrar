@@ -8,11 +8,11 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 F_REGEN_NGINX="$SCRIPT_DIR/regen_nginx_routes.sh"
 REGEN_NGINX_DST="/usr/local/bin/regen_nginx_routes.sh"
 
-# Copy the regen script
-install -m 700 "$F_REGEN_NGINX" "$REGEN_NGINX_DST"
+# Copy the regen script with secure permissions
+sudo install -m 700 "$F_REGEN_NGINX" "$REGEN_NGINX_DST"
 
 # Ensure ownership
-chown root:root "$REGEN_NGINX_DST"
+sudo chown root:root "$REGEN_NGINX_DST"
 
 # Check file mode (must be 700)
 MODE="$(stat -c '%a' "$REGEN_NGINX_DST")"
@@ -22,4 +22,3 @@ if [ "$MODE" != "700" ]; then
 fi
 
 echo "Installed $REGEN_NGINX_DST with mode 700 and root ownership."
-
