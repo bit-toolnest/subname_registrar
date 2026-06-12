@@ -3,9 +3,13 @@ apply from: 'deps.gradle'
 task installDeps {
     doLast {
         deps.each { dep ->
-            def depBase = "${buildDir}/deps/${dep.repo}"
+            def depsDir = file("${buildDir}/deps")
+            def depBase = "${depsDir}/${dep.repo}"
             def depZip = "${depBase}.zip"
             def branchOrTag = dep.version == "latest" ? "main" : dep.version
+
+            // Ensure deps directory exists
+            depsDir.mkdirs()
 
             if (!file(depBase).exists()) {
                 println "Downloading dependency repo: ${dep.repo} from org ${org}"
@@ -15,14 +19,13 @@ task installDeps {
                         "-o", depZip
                 }
 
-                // Use Gradle's built-in copy to unzip
                 project.copy {
                     from zipTree(depZip)
-                    into "${buildDir}/deps"
+                    into depsDir
                 }
 
-                // Fix extracted folder name (GitHub adds -main or -tag suffix)
-                def extracted = file("${buildDir}/deps/${dep.repo}-${branchOrTag}")
+                // Fix GitHub archive naming (repo-main, repo-tag)
+                def extracted = file("${depsDir}/${dep.repo}-${branchOrTag}")
                 if (extracted.exists()) {
                     extracted.renameTo(file(depBase))
                 }
