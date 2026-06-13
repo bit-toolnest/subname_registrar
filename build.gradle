@@ -3,13 +3,15 @@ apply from: 'deps.gradle'
 task installDeps {
     doLast {
         deps.each { dep ->
-            // Always resolve against rootProject.buildDir
-            def depsDir = rootProject.file("${rootProject.buildDir}/deps")
+            // Resolve depsDir: prefer parentDepsDir if passed
+            def depsDir = project.hasProperty('parentDepsDir') 
+                ? file(project.property('parentDepsDir')) 
+                : file("${rootProject.buildDir}/deps")
+
             def depBase = "${depsDir}/${dep.repo}"
             def depZip = "${depBase}.zip"
             def branchOrTag = dep.version == "latest" ? "main" : dep.version
 
-            // Ensure directories exist
             depsDir.mkdirs()
 
             if (!file(depBase).exists()) {
@@ -34,9 +36,8 @@ task installDeps {
             println "Installing dependency via Gradle: ${dep.repo}"
             exec {
                 workingDir depBase
-                // Pick up extra args from environment, default to none
-                def gradleArgs = System.getenv("GRADLE_ARGS") ?: ""
-                commandLine "./gradlew", "install", gradleArgs
+                // Always propagate parentDepsDir down
+                commandLine "./gradlew", "install", "-PparentDepsDir=${depsDir}"
             }
         }
     }
