@@ -34,7 +34,9 @@ task installDeps {
             println "Installing dependency via Gradle: ${dep.repo}"
             exec {
                 workingDir depBase
-                commandLine "./gradlew", "install"
+                // Pick up extra args from environment, default to none
+                def gradleArgs = System.getenv("GRADLE_ARGS") ?: ""
+                commandLine "./gradlew", "install", gradleArgs
             }
         }
     }
