@@ -1,5 +1,23 @@
 apply from: 'deps.gradle'
 
+// -------------------- ENVIRONMENT --------------------
+task prepareEnv {
+    description = "Source set_env.sh to export environment variables"
+    group = "setup"
+
+    doLast {
+        def envScript = file("${rootProject.projectDir}/set_env.sh")
+        if (!envScript.exists()) {
+            throw new GradleException("set_env.sh not found at ${envScript}")
+        }
+        println "[INFO] Sourcing environment script: ${envScript}"
+        // Run once to ensure variables are exported in subshells
+        exec {
+            commandLine "bash", "-c", "source ${envScript.absolutePath}"
+        }
+    }
+}
+
 task installDeps {
     doLast {
         deps.each { dep ->
@@ -99,3 +117,29 @@ task cleanBuildDir {
         }
     }
 }
+
+// -------------------- TEST SANDBOX --------------------
+task testSandbox {
+    description = "Run installer tests inside Docker sandbox via test/test_suite.sh"
+    group = "verification"
+
+    doLast {
+        println "Running sandbox tests..."
+        def testScript = file("${rootProject.projectDir}/test/test_suite.sh")
+        def envScript = file("${rootProject.projectDir}/set_env.sh")
+
+        if (!testScript.exists()) {
+            throw new GradleException("test.sh not found at ${testScript}")
+        }
+        if (!envScript.exists()) {
+            throw new GradleException("set_env.sh not found at ${envScript}")
+        }
+
+        // Source set_env.sh and then run test.sh in one shell
+        exec {
+            commandLine "bash", "-c", "source ${envScript.absolutePath} && bash ${testScript.absolutePath}"
+        }
+    }
+}
+
+

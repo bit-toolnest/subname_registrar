@@ -1,15 +1,15 @@
 #!/bin/bash
-# template/set_env.sh
+# source set_env.sh
 
-GRADLE_ARGS="--info"
-SERVICE_USER=""
-DOMAIN="bitone.in"
-PRINCIPAL="bitone"
-LOCAL_PORT="80"
-TOKEN=""
-
-export SERVICE_USER DOMAIN PRINCIPAL LOCAL_PORT TOKEN GRADLE_ARGS
+# Defaults with override support
+export GRADLE_ARGS="${GRADLE_ARGS:---info}"
+export EXECUTION_TIMEOUT="${EXECUTION_TIMEOUT:-1800}"
+export ADMIN_USER="${ADMIN_USER:-}"
+export GITHUB_TOKEN="${GITHUB_TOKEN:-}"
 
 echo "Environment variables set:"
 echo "  GRADLE_ARGS=$GRADLE_ARGS"
+echo "  EXECUTION_TIMEOUT=$EXECUTION_TIMEOUT"
+
+
 
