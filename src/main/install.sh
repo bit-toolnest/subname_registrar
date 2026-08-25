@@ -220,8 +220,12 @@ chown root:root "$NGINX_USERS_DIR"
 chmod 750 "$NGINX_USERS_DIR"
 
 echo "--> Installing nginx site for $DOMAIN"
-# domain.in has already been resolved by the wrapper before this script is called.
-sed -e "s|\${DOMAIN}|${DOMAIN}|g" -e "s|\${LOCAL_LISTEN_PORT}|${LOCAL_LISTEN_PORT:-8080}|g" "$F_TUNNEL_CONF" "$NGINX_SITE"
+
+sed \
+  -e "s|\${DOMAIN}|${DOMAIN}|g" \
+  -e "s|\${LOCAL_LISTEN_PORT}|${LOCAL_LISTEN_PORT:-8080}|g" \
+  "$F_TUNNEL_CONF" > "$NGINX_SITE"
+
 ln -sf "$NGINX_SITE" "$NGINX_SITE_ENABLED"
 chmod 644 "$NGINX_SITE"
 # Log file
