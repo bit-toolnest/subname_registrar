@@ -219,6 +219,34 @@ chmod 640 "$NGINX_USERS_DIR/subname_registrar_locations.conf"
 chown root:root "$NGINX_USERS_DIR"
 chmod 750 "$NGINX_USERS_DIR"
 
+# Create the standard web root for this domain.
+mkdir -p "$WEB_ROOT"
+chown -R root:root "/var/www/${DOMAIN}"
+chmod 755 "/var/www/${DOMAIN}"
+chmod 755 "$WEB_ROOT"
+
+# Install a default page if one does not already exist.
+if [ ! -f "$WEB_ROOT/index.html" ]; then
+    if [ -f /var/www/html/index.nginx-debian.html ]; then
+        cp /var/www/html/index.nginx-debian.html "$WEB_ROOT/index.html"
+    else
+        cat > "$WEB_ROOT/index.html" <<EOF
+<!DOCTYPE html>
+<html>
+<head>
+    <title>${DOMAIN}</title>
+</head>
+<body>
+    <h1>Welcome to ${DOMAIN}</h1>
+    <p>subname_registrar is running.</p>
+</body>
+</html>
+EOF
+    fi
+
+    chown root:root "$WEB_ROOT/index.html"
+    chmod 644 "$WEB_ROOT/index.html"
+fi
 echo "--> Installing nginx site for $DOMAIN"
 
 sed \
