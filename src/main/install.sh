@@ -37,7 +37,8 @@ ALLOC_PORT_DST="/usr/local/sbin/alloc_user_port.sh"
 REGEN_NGINX_DST="/usr/local/bin/regen_nginx_routes.sh"
 REMOVE_PORT_DST="/usr/local/sbin/remove_user_port.sh"
 UNINSTALL_DST="/usr/local/sbin/uninstall_tunnel_signer.sh"
-NGINX_USERS_DIR="/etc/nginx/conf.d"
+NGINX_USERS_DIR="/etc/nginx/subname_registrar"
+NGINX_USERS_CONF="$NGINX_USERS_DIR/subname_registrar_locations.conf"
 
 # centeralized TLS
 PROXY_SNIPPET="/etc/nginx/snippets/bitone_proxy.conf"
@@ -214,12 +215,13 @@ chown root:root "$ADD_TOKEN_DST" "$REVOKE_TOKEN_DST" "$ALLOC_PORT_DST" "$REGEN_N
 
 # create nginx per-user dir and snippet
 mkdir -p "$NGINX_USERS_DIR"
-touch "$NGINX_USERS_DIR/subname_registrar_locations.conf"
-chmod 640 "$NGINX_USERS_DIR/subname_registrar_locations.conf"
+touch NGINX_USERS_CONF
+chmod 640 NGINX_USERS_CONF
 chown root:root "$NGINX_USERS_DIR"
 chmod 750 "$NGINX_USERS_DIR"
 
 # Create the standard web root for this domain.
+WEB_ROOT="/var/www/${DOMAIN}/html"
 mkdir -p "$WEB_ROOT"
 chown -R root:root "/var/www/${DOMAIN}"
 chmod 755 "/var/www/${DOMAIN}"

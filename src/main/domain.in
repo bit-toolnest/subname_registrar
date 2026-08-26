@@ -38,5 +38,5 @@ server {
     access_log /var/log/nginx/${DOMAIN}.access.log;
     error_log  /var/log/nginx/${DOMAIN}.error.log warn;
     client_max_body_size 10M;
-    include /etc/nginx/conf.d/subname_registrar_locations.conf;
+    include /etc/nginx/subname_registrar/subname_registrar_locations.conf;
 }

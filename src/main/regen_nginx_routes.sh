@@ -2,7 +2,7 @@
 set -euo pipefail
 
 PORT_STORE="/etc/tunnel/user_ports.json"
-NGINX_USERS_DIR="/etc/nginx/conf.d"
+NGINX_USERS_DIR="/etc/nginx/subname_registrar"
 NGINX_USERS_CONF="$NGINX_USERS_DIR/subname_registrar_locations.conf"
 LOCK="/var/lock/regen_nginx_routes.lock"
 
