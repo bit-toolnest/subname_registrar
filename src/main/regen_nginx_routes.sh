@@ -65,10 +65,23 @@ install -m 640 "$DESIRED_CONFIG" "$NGINX_USERS_CONF"
 
 # The parent DOMAIN server configuration was resolved and installed at
 # installation time. Runtime route regeneration only changes this include file.
-if nginx -t >/dev/null 2>&1; then
-  systemctl reload nginx
-else
-  echo "ERROR: nginx config test failed. Run 'nginx -t' to inspect." >&2
-  nginx -t || true
-  exit 3
+BACKUP_CONFIG="${NGINX_USERS_CONF}.bak"
+
+if [ -f "$NGINX_USERS_CONF" ]; then
+    cp -a "$NGINX_USERS_CONF" "$BACKUP_CONFIG"
 fi
+
+install -m 640 "$DESIRED_CONFIG" "$NGINX_USERS_CONF"
+
+if nginx -t; then
+    systemctl reload nginx
+    rm -f "$BACKUP_CONFIG"
+else
+    if [ -f "$BACKUP_CONFIG" ]; then
+        mv -f "$BACKUP_CONFIG" "$NGINX_USERS_CONF"
+    else
+        rm -f "$NGINX_USERS_CONF"
+    fi
+    exit 3
+fi
+
