@@ -3,4 +3,5 @@ ext.org = "bit-toolnest"   // your GitHub org
 //use real tool repo instead of toolA, toolB, toolC
 ext.deps = [
   [repo: "nginx", version: "latest"],
+  [repo: "certbot", version: "latest"]
 ]
